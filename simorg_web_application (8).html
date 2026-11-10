@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMORG - Sistem Informasi Manajemen Organisasi</title>
+    <!-- Bootstrap 5.1.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons 1.8.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- HTML5-QRCode Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- QRCode Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-navy: #0f172a;
+            --secondary-navy: #1e293b;
+            --teal-accent: #0d9488;
+            --teal-light: #14b8a6;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styling */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--primary-navy);
+            color: #fff;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px 15px;
+            background: var(--secondary-navy);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #sidebar ul.components {
+            padding: 15px 0;
+        }
+
+        #sidebar ul li a {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover, #sidebar ul li a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--teal-light);
+        }
+
+        #sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        /* Content Area */
+        #content {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        /* Top Navbar */
+        .navbar-custom {
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            padding: 12px 25px;
+        }
+
+        /* Cards & Components */
+        .card-custom {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            background: #fff;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .bg-teal-subtle {
+            background-color: #ccfbf1;
+            color: #0f766e;
+        }
+
+        /* Org Tree Visual */
+        .tree-node {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border-top: 4px solid var(--teal-accent);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            text-align: center;
+            position: relative;
+        }
+
+        .badge-role {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        /* Login Screen Styling */
+        #loginScreen {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            overflow-y: auto;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+
+        .login-brand-side {
+            background: linear-gradient(135deg, #0d9488 0%, #0f172a 100%);
+            color: #ffffff;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quick-role-btn {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.825rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .quick-role-btn:hover {
+            border-color: var(--teal-accent);
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        @media (max-width: 991.98px) {
+            #sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN OVERLAY -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="row g-0">
+                <!-- Left Brand Side -->
+                <div class="col-lg-5 login-brand-side d-none d-lg-flex">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-diagram-3-fill fs-2 text-info me-2"></i>
+                            <h3 class="fw-bold m-0 text-white">SIMORG</h3>
+                        </div>
+                        <p class="text-white-50">Sistem Informasi Manajemen Organisasi Terpadu & Modern</p>
+                    </div>
+                    <div class="my-4">
+                        <div class="mb-3 d-flex align-items-center">
+                            <i class="bi bi-shield-check text-info fs-4 me-3"></i>
+                            <small>Hak akses aman & terkelola sesuai peran pengguna</small>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center">
+                            <i class="bi bi-speedometer2 text-info fs-4 me-3"></i>
+                            <small>Dashboard real-time, transparansi kas & inventaris</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-journal-check text-info fs-4 me-3"></i>
+                            <small>Arsip dokumen & pencatatan absensi digital</small>
+                        </div>
+                    </div>
+                    <div class="small text-white-50">
+                        &copy; 2026 SIMORG System. All rights reserved.
+                    </div>
+                </div>
+
+                <!-- Right Form Side (LOGIN FORM) -->
+                <div class="col-lg-7 p-4 p-md-5" id="loginFormContainer">
+                    <div class="d-flex align-items-center mb-3 d-lg-none">
+                        <i class="bi bi-diagram-3-fill fs-3 text-primary me-2"></i>
+                        <h4 class="fw-bold m-0 text-dark">SIMORG</h4>
+                    </div>
+                    
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-qr-code-scan text-primary me-2"></i>Login Scan Barcode / QR</h4>
+                    <p class="text-muted small mb-3">Tunjukkan atau dekatkan QR Code Kartu Anggota Anda ke kamera untuk masuk.</p>
+
+                    <div id="loginAlert" class="alert alert-danger py-2 small d-none" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="loginAlertMsg">Username atau password salah!</span>
+                    </div>
+
+                    <!-- Primary Login Method: QR Scanner Camera -->
+                    <div id="loginScanArea" class="text-center">
+                        <div id="login-qr-reader" style="width: 100%; max-width: 380px; margin: 0 auto;" class="rounded overflow-hidden border mb-2 shadow-sm"></div>
+                        <span class="badge bg-teal-subtle text-teal p-2 mb-3"><i class="bi bi-camera me-1"></i>Kamera Pemindai Aktif</span>
+                    </div>
+
+                    <!-- Secondary Method: Manual Fallback -->
+                    <div id="manualLoginSection" class="d-none border-top pt-3 mt-2">
+                        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold text-dark mb-1">NISN / ID Anggota</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="bi bi-person text-muted"></i></span>
+                                    <input type="text" id="loginUsername" class="form-control" placeholder="Contoh: 0054829102">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-semibold text-dark mb-1">Password</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light"><i class="bi bi-lock text-muted"></i></span>
+                                    <input type="password" id="loginPassword" class="form-control" placeholder="••••••••">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('loginPassword', 'togglePasswordIcon')"><i class="bi bi-eye" id="togglePasswordIcon"></i></button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-sm py-2 fw-semibold mb-2">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Masuk Manual
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Toggle Login Mode Buttons -->
+                    <div class="text-center my-2">
+                        <button type="button" id="btnToggleManualLogin" class="btn btn-link btn-sm text-decoration-none text-muted" onclick="toggleManualLoginMode()">
+                            <i class="bi bi-keyboard me-1"></i>Beralih ke Input Manual (NISN & Password)
+                        </button>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <span class="small text-muted">Belum memiliki akun? </span>
+                        <a href="#" class="small fw-bold text-decoration-none text-primary" onclick="showRegisterForm(event)">Buat Akun Baru / Daftar</a>
+                    </div>
+
+                    <!-- Quick Demo Role Switcher Buttons & QR Badges -->
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="small fw-bold text-muted"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Uji Coba Cepat (Click / Scan QR Demo):</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('0054829102')">👑 <strong>Ketua</strong></button>
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('19750812')">🎓 <strong>Pembina</strong></button>
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('0054829104')">📝 <strong>Sekretaris</strong></button>
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('0054829105')">💰 <strong>Bendahara</strong></button>
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('0054829106')">📦 <strong>Perlengkapan</strong></button>
+                            <button type="button" class="quick-role-btn" onclick="quickLoginWithNISN('0054829107')">👤 <strong>Anggota</strong></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Form Side (REGISTER FORM) -->
+                <div class="col-lg-7 p-4 p-md-5 d-none" id="registerFormContainer">
+                    <div class="d-flex align-items-center mb-3 d-lg-none">
+                        <i class="bi bi-diagram-3-fill fs-3 text-primary me-2"></i>
+                        <h4 class="fw-bold m-0 text-dark">SIMORG</h4>
+                    </div>
+                    
+                    <h4 class="fw-bold text-dark mb-1"><i class="bi bi-person-badge-fill text-success me-2"></i>Pendaftaran Anggota Baru</h4>
+                    <p class="text-muted small mb-3">Daftarkan diri Anda sebagai anggota. QR Code / Barcode Kartu Anggota akan dibuat secara otomatis!</p>
+
+                    <div id="registerAlert" class="alert alert-danger py-2 small d-none" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i><span id="registerAlertMsg"></span>
+                    </div>
+
+                    <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Nama Lengkap</label>
+                                <input type="text" id="regNama" class="form-control form-control-sm" placeholder="Contoh: Andi Pratama" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Username</label>
+                                <input type="text" id="regUsername" class="form-control form-control-sm" placeholder="andipratama" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">NISN / ID Anggota (Kode Barcode)</label>
+                                <input type="text" id="regNisn" class="form-control form-control-sm" placeholder="0061234567" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Kelas / Divisi</label>
+                                <input type="text" id="regKelas" class="form-control form-control-sm" placeholder="Divisi Utama / XI IPA 1" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold text-dark mb-1">Role / Peran Organisasi</label>
+                            <select id="regRole" class="form-select form-select-sm" required>
+                                <option value="Anggota" selected>Anggota (Membaca Informasi & Absensi)</option>
+                                <option value="Sekretaris">Sekretaris (Absensi & Dokumen)</option>
+                                <option value="Bendahara">Bendahara (Manajemen Kas)</option>
+                                <option value="Perlengkapan">Seksi Perlengkapan (Inventaris)</option>
+                                <option value="Pembina">Pembina (Persetujuan & Catatan Evaluasi)</option>
+                                <option value="Ketua">Ketua (Akses Penuh)</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Password</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="password" id="regPassword" class="form-control" placeholder="Minimal 4 karakter" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('regPassword', 'toggleRegPassIcon1')"><i class="bi bi-eye" id="toggleRegPassIcon1"></i></button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark mb-1">Konfirmasi Password</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Ketik ulang password" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('regConfirmPassword', 'toggleRegPassIcon2')"><i class="bi bi-eye" id="toggleRegPassIcon2"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mb-3">
+                            <i class="bi bi-qr-code-scan me-2"></i>Daftar & Terbitkan Kartu QR Anggota
+                        </button>
+
+                        <div class="text-center">
+                            <span class="small text-muted">Sudah punya akun? </span>
+                            <a href="#" class="small fw-bold text-decoration-none text-primary" onclick="showLoginForm(event)">Kembali ke Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-diagram-3 text-info fs-3 me-2"></i>
+                <h5 class="m-0 fw-bold text-white">SIMORG</h5>
+            </div>
+            <button type="button" id="sidebarCollapse" class="btn btn-sm btn-outline-light d-lg-none" onclick="toggleSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <ul class="list-unstyled components">
+            <li>
+                <a href="#" id="menu-dashboard" class="nav-link-item active" onclick="switchTab('dashboard', event)">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-pengurus" class="nav-link-item" onclick="switchTab('pengurus', event)">
+                    <i class="bi bi-people-fill"></i> Data Anggota
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-struktur" class="nav-link-item" onclick="switchTab('struktur', event)">
+                    <i class="bi bi-diagram-3-fill"></i> Struktur Organisasi
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-proja" class="nav-link-item" onclick="switchTab('proja', event)">
+                    <i class="bi bi-kanban-fill"></i> Program Kerja
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-agenda" class="nav-link-item" onclick="switchTab('agenda', event)">
+                    <i class="bi bi-calendar-event-fill"></i> Agenda & Jadwal
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-absensi" class="nav-link-item" onclick="switchTab('absensi', event)">
+                    <i class="bi bi-clipboard-check-fill"></i> Absensi
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-kas" class="nav-link-item" onclick="switchTab('kas', event)">
+                    <i class="bi bi-wallet2"></i> Kas Organisasi
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-inventaris" class="nav-link-item" onclick="switchTab('inventaris', event)">
+                    <i class="bi bi-box-seam"></i> Inventaris
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-dokumen" class="nav-link-item" onclick="switchTab('dokumen', event)">
+                    <i class="bi bi-folder-fill"></i> Dokumen & Arsip
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-laporan" class="nav-link-item" onclick="switchTab('laporan', event)">
+                    <i class="bi bi-file-earmark-bar-graph-fill"></i> Laporan & Evaluasi
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-drive" class="nav-link-item" onclick="switchTab('drive', event)">
+                    <i class="bi bi-cloud-arrow-up-fill"></i> Cloud Backup / Drive
+                </a>
+            </li>
+            <li>
+                <a href="#" id="menu-profil" class="nav-link-item" onclick="switchTab('profil', event)">
+                    <i class="bi bi-gear-fill"></i> Pengaturan Profil
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div id="content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <button type="button" id="sidebarToggle" class="btn btn-light d-lg-none me-2" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <div class="d-flex align-items-center">
+                    <h5 class="m-0 fw-semibold text-dark d-none d-md-block" id="header-title">Dashboard Utama</h5>
+                </div>
+
+                <!-- Controls & Multi-Role Indicator -->
+                <div class="d-flex align-items-center gap-3 ms-auto">
+                    <div class="d-flex align-items-center bg-light rounded-pill px-3 py-1 border">
+                        <i class="bi bi-shield-lock-fill text-primary me-2"></i>
+                        <span class="small fw-bold text-muted me-1 d-none d-sm-inline">Role:</span>
+                        <span class="badge bg-primary" id="activeRoleNameTag">Ketua</span>
+                    </div>
+
+                    <!-- User Info & Logout Dropdown -->
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img id="userAvatarHeader" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" width="36" height="36" class="rounded-circle me-2 border">
+                            <div class="d-none d-md-block text-start" style="line-height: 1.2;">
+                                <div class="fw-bold small" id="userNameDisplay">Muhammad Rizky</div>
+                                <small class="text-muted" style="font-size: 0.75rem;" id="userRoleBadge">Ketua Organisasi</small>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="dropdownUser">
+                            <li><a class="dropdown-item" href="#" onclick="switchTab('profil', event)"><i class="bi bi-person me-2"></i>Profil Pengguna</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="confirmLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar / Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dynamic Content Sections -->
+        <div class="container-fluid p-4">
+            
+            <!-- Toast Notification Area -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+                <div id="liveToast" class="toast align-items-center text-white bg-dark border-0 shadow" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body" id="toast-message">
+                            Aksi berhasil dilakukan.
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: DASHBOARD -->
+            <div id="sec-dashboard" class="tab-content">
+                <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm rounded-3 d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill fs-4 me-3 text-info"></i>
+                    <div>
+                        <strong>Mode Role SIMORG Active: <span id="bannerRoleName">Ketua Organisasi</span></strong>
+                        <div class="small" id="bannerRoleDesc">Akses penuh untuk mengelola seluruh aspek organisasi.</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted small fw-semibold">Total Anggota</span>
+                                    <h3 class="fw-bold m-0 mt-1" id="dashTotalPengurus">0</h3>
+                                </div>
+                                <div class="stat-icon bg-primary text-white">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted small fw-semibold">Proja Aktif</span>
+                                    <h3 class="fw-bold m-0 mt-1" id="dashProjaAktif">0</h3>
+                                </div>
+                                <div class="stat-icon bg-teal-subtle">
+                                    <i class="bi bi-kanban"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted small fw-semibold">Saldo Kas Organisasi</span>
+                                    <h4 class="fw-bold m-0 mt-1 text-success" id="dashSaldoKas">Rp 0</h4>
+                                </div>
+                                <div class="stat-icon bg-success text-white">
+                                    <i class="bi bi-cash-stack"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-sm-6 col-xl-3">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <span class="text-muted small fw-semibold">Agenda Mendatang</span>
+                                    <h3 class="fw-bold m-0 mt-1" id="dashAgendaMendatang">0</h3>
+                                </div>
+                                <div class="stat-icon bg-warning text-dark">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-lg-8">
+                        <div class="card card-custom p-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold m-0"><i class="bi bi-bar-chart-line-fill text-teal-accent me-2"></i>Rekap Kas & Activities Organisasi</h6>
+                            </div>
+                            <div style="height: 280px;">
+                                <canvas id="dashboardChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-4">
+                        <div class="card card-custom p-3">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-activity text-danger me-2"></i>Aktivitas Terkini</h6>
+                            <ul class="list-group list-group-flush small" id="quickFeedList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: DATA PENGURUS / ANGGOTA -->
+            <div id="sec-pengurus" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 500px;">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" id="searchPengurus" class="form-control" placeholder="Cari Nama / ID / Jabatan..." onkeyup="renderPengurusTable()">
+                            </div>
+                            <select id="filterJabatan" class="form-select w-auto" onchange="renderPengurusTable()">
+                                <option value="">Semua Jabatan</option>
+                                <option value="Ketua">Ketua</option>
+                                <option value="Wakil Ketua">Wakil Ketua</option>
+                                <option value="Sekretaris">Sekretaris</option>
+                                <option value="Bendahara">Bendahara</option>
+                                <option value="Seksi Perlengkapan">Seksi Perlengkapan</option>
+                                <option value="Anggota">Anggota</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary role-restrict-ketua" onclick="openModalPengurus()"><i class="bi bi-plus-lg me-1"></i>Tambah Anggota</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID/NISN</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Divisi/Kelas</th>
+                                    <th>Jabatan</th>
+                                    <th>Kontak</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Kartu QR</th>
+                                    <th class="text-center role-restrict-ketua">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pengurusTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: STRUKTUR ORGANISASI -->
+            <div id="sec-struktur" class="tab-content" style="display: none;">
+                <div class="card card-custom p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold m-0"><i class="bi bi-diagram-3-fill text-primary me-2"></i>Bagan Struktur Organisasi SIMORG</h5>
+                        <button class="btn btn-primary role-restrict-ketua" onclick="openModalStruktur()"><i class="bi bi-plus-lg me-1"></i>Tambah Posisi Struktur</button>
+                    </div>
+                    
+                    <div class="d-flex flex-column align-items-center gap-4" id="structureContainer">
+                        <!-- Dynamic org tree will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: PROGRAM KERJA -->
+            <div id="sec-proja" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-kanban text-teal-accent me-2"></i>Daftar Program Kerja Organisasi</h5>
+                        <button class="btn btn-primary role-restrict-ketua" onclick="openModalProja()"><i class="bi bi-plus-lg me-1"></i>Buat Proja Baru</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nama Program</th>
+                                    <th>Divisi / Sekbid</th>
+                                    <th>Target Pelaksanaan</th>
+                                    <th>Anggaran (Rp)</th>
+                                    <th>Approval (Pembina/Ketua)</th>
+                                    <th>Progress</th>
+                                    <th class="text-center role-restrict-approval">Approval Action</th>
+                                    <th class="text-center role-restrict-ketua">Kelola</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projaTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: AGENDA & JADWAL -->
+            <div id="sec-agenda" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-calendar-event text-warning me-2"></i>Agenda & Jadwal Kegiatan</h5>
+                        <button class="btn btn-primary role-restrict-sekretaris" onclick="openModalAgenda()"><i class="bi bi-plus-lg me-1"></i>Tambah Agenda</button>
+                    </div>
+                    <div class="row g-3" id="agendaCardContainer"></div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: ABSENSI -->
+            <div id="sec-absensi" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <div>
+                            <h5 class="fw-bold m-0"><i class="bi bi-clipboard-check text-success me-2"></i>Pencatatan Absensi Digital</h5>
+                            <small class="text-muted">Pilih agenda kegiatan untuk mencatat absensi manual atau via Scan Barcode/QR</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="absensiAgendaSelect" class="form-select w-auto" onchange="renderAbsensiTable()"></select>
+                            <button class="btn btn-success role-restrict-sekretaris" onclick="openModalScanQR()">
+                                <i class="bi bi-qr-code-scan me-1"></i>Scan QR / Barcode
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nama Anggota</th>
+                                    <th>Jabatan</th>
+                                    <th>Status Kehadiran</th>
+                                    <th>Keterangan / Waktu Scan</th>
+                                    <th class="text-center role-restrict-sekretaris">Status Input</th>
+                                </tr>
+                            </thead>
+                            <tbody id="absensiTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 7: KAS ORGANISASI -->
+            <div id="sec-kas" class="tab-content" style="display: none;">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 border-start border-4 border-success">
+                            <span class="text-muted small">Total Pemasukan</span>
+                            <h4 class="fw-bold text-success m-0" id="kasTotalMasuk">Rp 0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 border-start border-4 border-danger">
+                            <span class="text-muted small">Total Pengeluaran</span>
+                            <h4 class="fw-bold text-danger m-0" id="kasTotalKeluar">Rp 0</h4>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card card-custom p-3 border-start border-4 border-primary">
+                            <span class="text-muted small">Saldo Saat Ini</span>
+                            <h4 class="fw-bold text-primary m-0" id="kasTotalSaldo">Rp 0</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-custom p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-journal-text text-primary me-2"></i>Riwayat Transaksi Kas Organisasi</h5>
+                        <button class="btn btn-primary role-restrict-bendahara" onclick="openModalKas()"><i class="bi bi-plus-lg me-1"></i>Tambah Transaksi</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Keterangan</th>
+                                    <th>Jenis</th>
+                                    <th>Jumlah (Rp)</th>
+                                    <th class="text-center role-restrict-bendahara">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kasTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 8: INVENTARIS -->
+            <div id="sec-inventaris" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-box-seam text-secondary me-2"></i>Daftar Aset & Inventaris</h5>
+                        <button class="btn btn-primary role-restrict-perlengkapan" onclick="openModalInventaris()"><i class="bi bi-plus-lg me-1"></i>Catat Barang</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Kode Barang</th>
+                                    <th>Nama Barang</th>
+                                    <th>Jumlah</th>
+                                    <th>Kondisi</th>
+                                    <th>Lokasi Penyimpanan</th>
+                                    <th class="text-center role-restrict-perlengkapan">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventarisTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 9: DOKUMEN & ARSIP -->
+            <div id="sec-dokumen" class="tab-content" style="display: none;">
+                <div class="card card-custom p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold m-0"><i class="bi bi-folder-symlink text-info me-2"></i>Arsip Surat & Dokumen Organisasi</h5>
+                        <button class="btn btn-primary role-restrict-sekretaris" onclick="openModalDokumen()"><i class="bi bi-upload me-1"></i>Upload Dokumen</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nomor / Kode</th>
+                                    <th>Judul Dokumen</th>
+                                    <th>Kategori</th>
+                                    <th>Tanggal Upload</th>
+                                    <th>File Size</th>
+                                    <th class="text-center">Unduh / Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dokumenTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 10: LAPORAN & EVALUASI -->
+            <div id="sec-laporan" class="tab-content" style="display: none;">
+                <div class="card card-custom p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold m-0"><i class="bi bi-printer text-dark me-2"></i>Rekapitulasi Laporan & Evaluasi Organisasi</h5>
+                        <button class="btn btn-success" onclick="window.print()"><i class="bi bi-printer me-1"></i>Cetak Laporan</button>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <h6 class="fw-bold border-bottom pb-2">Ringkasan Evaluasi Kinerja Program</h6>
+                                <p class="small text-muted mb-2">Total Proja Direncanakan: <strong id="lapTotalProja">0</strong></p>
+                                <p class="small text-muted mb-2">Proja Selesai (100%): <strong id="lapProjaSelesai">0</strong></p>
+                                <p class="small text-muted mb-0">Persentase Keberhasilan: <strong class="text-success" id="lapProjaPersen">0%</strong></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <h6 class="fw-bold border-bottom pb-2">Catatan Evaluasi Pembina</h6>
+                                <p class="small text-muted" id="evaluasiPembinaText">"Secara keseluruhan kegiatan organisasi berjalan dengan tertib. Pastikan inventaris dan absensi kegiatan dilaporkan secara konsisten."</p>
+                                <button class="btn btn-sm btn-outline-primary role-restrict-pembina" onclick="editCatatanPembina()">Edit Catatan (Pembina)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 11: GOOGLE DRIVE & CLOUD BACKUP -->
+            <div id="sec-drive" class="tab-content" style="display: none;">
+                <div class="card card-custom p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="bi bi-cloud-arrow-up-fill text-primary me-2"></i>Integrasi Google Drive & Cloud Backup</h5>
+                    <p class="text-muted small">Amankan seluruh data SIMORG Anda dengan mengekspor backup JSON/CSV untuk disimpan di Google Drive atau mengkoneksikan Webhook Google Sheets.</p>
+
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100 bg-light">
+                                <h6 class="fw-bold"><i class="bi bi-file-earmark-arrow-down text-success me-2"></i>Ekspor & Backup Database</h6>
+                                <p class="small text-muted">Unduh seluruh snapshot database dalam format `.json` atau format spreadsheet `.csv` untuk disimpan di Google Drive.</p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary" onclick="exportDataJSON()"><i class="bi bi-download me-1"></i>Unduh JSON Backup</button>
+                                    <button class="btn btn-sm btn-success" onclick="exportDataCSV()"><i class="bi bi-file-spreadsheet me-1"></i>Unduh CSV Sheets</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100 bg-light">
+                                <h6 class="fw-bold"><i class="bi bi-file-earmark-arrow-up text-primary me-2"></i>Restore Database dari Drive</h6>
+                                <p class="small text-muted">Pilih file `.json` backup yang telah Anda unduh sebelumnya untuk memulihkan seluruh data organisasi.</p>
+                                <div class="input-group input-group-sm">
+                                    <input type="file" id="importFileJson" class="form-control" accept=".json">
+                                    <button class="btn btn-outline-primary" type="button" onclick="importDataJSON()">Restore</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3 mt-4">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-google text-danger me-2"></i>Sinkronisasi Real-Time Google Apps Script Webhook</h6>
+                        <div class="row g-2">
+                            <div class="col-md-8">
+                                <input type="url" id="googleScriptUrl" class="form-control form-control-sm" placeholder="Paste Webhook Google Apps Script Web App URL di sini...">
+                            </div>
+                            <div class="col-md-4 d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-secondary w-50" onclick="saveGoogleSheetsConfig()">Simpan Webhook</button>
+                                <button class="btn btn-sm btn-danger w-50" onclick="syncToGoogleSheets()"><i class="bi bi-arrow-repeat me-1"></i>Sync Sheets</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 12: PROFIL & PENGATURAN -->
+            <div id="sec-profil" class="tab-content" style="display: none;">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="card card-custom p-3 text-center">
+                            <img id="profileAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Profile" class="rounded-circle mx-auto mb-3 border" width="100" height="100">
+                            <h5 class="fw-bold mb-1" id="profileName">Muhammad Rizky</h5>
+                            <span class="badge bg-primary mb-2" id="profileRoleBadge">Ketua Organisasi</span>
+                            <p class="text-muted small mb-3">SIMORG System User</p>
+
+                            <div class="border-top pt-3 text-start">
+                                <h6 class="fw-bold small mb-2"><i class="bi bi-key me-1"></i>Keamanan Akun</h6>
+                                <form id="formPassword" onsubmit="handlePasswordChange(event)">
+                                    <div class="mb-2">
+                                        <input type="password" id="oldPasswordInput" class="form-control form-control-sm" placeholder="Password Lama" required>
+                                    </div>
+                                    <div class="mb-2">
+                                        <input type="password" id="newPasswordInput" class="form-control form-control-sm" placeholder="Password Baru" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary w-100">Ubah Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card card-custom p-3">
+                            <h6 class="fw-bold mb-3">Identitas Organisasi & Lembaga</h6>
+                            <form id="schoolProfileForm" onsubmit="saveSchoolProfile(event)">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Nama Organisasi / Lembaga</label>
+                                    <input type="text" class="form-control" id="schoolName" value="Organisasi Pemuda & Siswa Mandiri">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Nama Pembina Organisasi</label>
+                                    <input type="text" class="form-control" id="schoolPembina" value="Dra. Endang Rahayu, M.Pd">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Masa Bakti / Periode Kepengurusan</label>
+                                    <input type="text" class="form-control" id="schoolPeriode" value="2025/2026">
+                                </div>
+                                <button type="submit" class="btn btn-primary role-restrict-ketua">Simpan Perubahan Identitas</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL: DATA ANGGOTA -->
+    <div class="modal fade" id="modalPengurus" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalPengurusTitle">Tambah Anggota</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formPengurus" onsubmit="savePengurus(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="pengurusId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">ID / NISN</label>
+                            <input type="text" class="form-control" id="pengurusNisn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nama Lengkap</label>
+                            <input type="text" class="form-control" id="pengurusNama" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Divisi / Kelas</label>
+                                <input type="text" class="form-control" id="pengurusKelas" placeholder="Divisi Utama" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Jabatan</label>
+                                <select class="form-select" id="pengurusJabatan" required>
+                                    <option value="Ketua">Ketua</option>
+                                    <option value="Wakil Ketua">Wakil Ketua</option>
+                                    <option value="Sekretaris">Sekretaris</option>
+                                    <option value="Bendahara">Bendahara</option>
+                                    <option value="Seksi Perlengkapan">Seksi Perlengkapan</option>
+                                    <option value="Anggota">Anggota</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Kontak / WhatsApp</label>
+                            <input type="text" class="form-control" id="pengurusKontak" placeholder="0812xxxxxxxx" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Status Keanggotaan</label>
+                            <select class="form-select" id="pengurusStatus">
+                                <option value="Aktif">Aktif</option>
+                                <option value="Demisioner">Demisioner</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: STRUKTUR ORGANISASI -->
+    <div class="modal fade" id="modalStruktur" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalStrukturTitle">Tambah/Edit Posisi Struktur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formStruktur" onsubmit="saveStruktur(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="strukturId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Jabatan / Posisi</label>
+                            <input type="text" class="form-control" id="strukturJabatan" placeholder="Contoh: Pembina / Ketua / Koordinator Humas" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nama Pejabat/Pengurus</label>
+                            <input type="text" class="form-control" id="strukturNama" placeholder="Nama Lengkap" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tingkat / Hirarki</label>
+                            <select class="form-select" id="strukturLevel">
+                                <option value="pembina">Pembina (Tingkat Atas)</option>
+                                <option value="inti">Pengurus Inti (Ketua / Wakil)</option>
+                                <option value="sekbend">Sekretaris & Bendahara</option>
+                                <option value="divisi">Koordinator Sekbid / Divisi</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Keterangan / Deskripsi</label>
+                            <input type="text" class="form-control" id="strukturKet" placeholder="Contoh: Administrasi & Dokumen">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Posisi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PROGRAM KERJA -->
+    <div class="modal fade" id="modalProja" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="modalProjaTitle">Tambah Program Kerja Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formProja" onsubmit="saveProja(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="projaId">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nama Program Kerja</label>
+                            <input type="text" class="form-control" id="projaNama" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Divisi / Sekbid Penanggung Jawab</label>
+                            <input type="text" class="form-control" id="projaSekbid" required placeholder="Contoh: Divisi Event">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Target Pelaksanaan</label>
+                                <input type="date" class="form-control" id="projaTarget" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Anggaran (Rp)</label>
+                                <input type="number" class="form-control" id="projaAnggaran" required placeholder="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Progress Saat Ini (%)</label>
+                            <input type="number" class="form-control" id="projaProgress" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Proja</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: AGENDA -->
+    <div class="modal fade" id="modalAgenda" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Tambah Agenda Kegiatan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formAgenda" onsubmit="saveAgenda(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Judul Agenda</label>
+                            <input type="text" class="form-control" id="agendaJudul" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Tanggal</label>
+                                <input type="date" class="form-control" id="agendaTanggal" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Lokasi</label>
+                                <input type="text" class="form-control" id="agendaLokasi" required placeholder="Aula Utama">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Deskripsi / Catatan Agenda</label>
+                            <textarea class="form-control" id="agendaDeskripsi" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Agenda</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: KAS ORGANISASI -->
+    <div class="modal fade" id="modalKas" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Catat Transaksi Kas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formKas" onsubmit="saveKas(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Tanggal Transaksi</label>
+                            <input type="date" class="form-control" id="kasTanggal" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Keterangan Transaksi</label>
+                            <input type="text" class="form-control" id="kasKet" required placeholder="Contoh: Iuran Kas Anggota">
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Jenis Transaksi</label>
+                                <select class="form-select" id="kasJenis" required>
+                                    <option value="Masuk">Pemasukan (Masuk)</option>
+                                    <option value="Keluar">Pengeluaran (Keluar)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Jumlah (Rp)</label>
+                                <input type="number" class="form-control" id="kasJumlah" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Transaksi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INVENTARIS -->
+    <div class="modal fade" id="modalInventaris" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Tambah / Edit Aset Inventaris</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formInventaris" onsubmit="saveInventaris(event)">
+                    <div class="modal-body">
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Kode Barang</label>
+                                <input type="text" class="form-control" id="invKode" placeholder="INV-004" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Jumlah (Pcs)</label>
+                                <input type="number" class="form-control" id="invJumlah" min="1" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nama Barang / Aset</label>
+                            <input type="text" class="form-control" id="invNama" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Kondisi</label>
+                                <select class="form-select" id="invKondisi">
+                                    <option value="Baik">Baik</option>
+                                    <option value="Rusak Ringan">Rusak Ringan</option>
+                                    <option value="Rusak Berat">Rusak Berat</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Lokasi Penyimpanan</label>
+                                <input type="text" class="form-control" id="invLokasi" placeholder="Gudang Inventaris" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan Barang</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DOKUMEN -->
+    <div class="modal fade" id="modalDokumen" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Upload Dokumen Organisasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formDokumen" onsubmit="saveDokumen(event)">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Pilih File Lokal</label>
+                            <input type="file" class="form-control" id="docFileInput" onchange="handleDocFileSelect(event)" required>
+                            <small class="text-muted" style="font-size: 0.75rem;">Mendukung PDF, Word, Excel, Gambar, dll.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Nomor / Kode Dokumen</label>
+                            <input type="text" class="form-control" id="docKode" placeholder="DOC-03/SIMORG/2026" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Judul Dokumen</label>
+                            <input type="text" class="form-control" id="docJudul" required>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Kategori</label>
+                                <select class="form-select" id="docKategori">
+                                    <option value="Proposal">Proposal</option>
+                                    <option value="Surat Keluar">Surat Keluar</option>
+                                    <option value="Surat Masuk">Surat Masuk</option>
+                                    <option value="Laporan">Laporan / LPJ</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Ukuran File</label>
+                                <input type="text" class="form-control" id="docSize" readonly placeholder="-">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Upload Dokumen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SCANNER QR / BARCODE ABSENSI -->
+    <div class="modal fade" id="modalScanQR" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-qr-code-scan me-2 text-info"></i>Scan Barcode / QR Code Kehadiran</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="stopQRScanner()"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div class="alert alert-info py-2 small mb-3">
+                        Target Agenda: <strong id="scanTargetAgendaName">-</strong>
+                    </div>
+
+                    <!-- Camera Viewfinder -->
+                    <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto;" class="rounded overflow-hidden border"></div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted d-block mb-2">Atau masukkan NISN / ID Anggota secara manual untuk simulasi:</small>
+                        <div class="input-group">
+                            <input type="text" id="manualScanInput" class="form-control" placeholder="Contoh: 0054829107">
+                            <button class="btn btn-primary" type="button" onclick="processScannedCode(document.getElementById('manualScanInput').value)">Submit Scan</button>
+                        </div>
+                    </div>
+                    <div id="scanResultAlert" class="mt-3 alert d-none py-2 small"></div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <span class="small text-muted"><i class="bi bi-shield-check me-1 text-success"></i>Scanner Kamera Real-Time</span>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" onclick="stopQRScanner()">Tutup Scanner</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CARD & QR CODE ANGGOTA -->
+    <div class="modal fade" id="modalCardQR" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white py-2">
+                    <h6 class="modal-title fw-bold m-0"><i class="bi bi-person-badge me-2"></i>Kartu QR Anggota</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-3">
+                    <div class="border rounded p-3 bg-light mb-2 shadow-sm">
+                        <h6 class="fw-bold m-0 text-dark" id="qrCardName">Nama Anggota</h6>
+                        <small class="badge bg-secondary mb-2" id="qrCardJabatan">Jabatan</small>
+                        <div id="qrcodeContainer" class="d-flex justify-content-center my-2 p-2 bg-white rounded border"></div>
+                        <span class="small text-muted fw-mono" id="qrCardID">ID: -</span>
+                    </div>
+                    <small class="text-muted style-italic d-block" style="font-size: 0.75rem;">Gunakan Kartu QR ini untuk Login & Absensi Kegiatan.</small>
+                </div>
+                <div class="modal-footer py-1">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SIMORG JavaScript Logic -->
+    <script>
+        // Seed Registered Users
+        const defaultRegisteredUsers = [
+            { username: 'ketuamuhammad', password: 'ketua123', name: 'Muhammad Rizky', role: 'Ketua', nisn: '0054829102', kelas: 'Divisi Inti', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' },
+            { username: 'pembinadra', password: 'pembina123', name: 'Dra. Endang Rahayu, M.Pd', role: 'Pembina', nisn: '19750812', kelas: 'Pembina Utama', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80' },
+            { username: 'sekretarisahmad', password: 'sekretaris123', name: 'Ahmad Fauzi', role: 'Sekretaris', nisn: '0054829104', kelas: 'Sekretariat', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80' },
+            { username: 'bendaharanabila', password: 'bendahara123', name: 'Nabila Putri', role: 'Bendahara', nisn: '0054829105', kelas: 'Keuangan', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80' },
+            { username: 'logistikbudi', password: 'perlengkapan123', name: 'Budi Santoso', role: 'Perlengkapan', nisn: '0054829106', kelas: 'Logistik', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80' },
+            { username: 'anggotarayhan', password: 'anggota123', name: 'Rayhan M.', role: 'Anggota', nisn: '0054829107', kelas: 'Anggota Umum', avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&auto=format&fit=crop&q=80' }
+        ];
+
+        let registeredUsers = JSON.parse(localStorage.getItem('SIMORG_USERS')) || defaultRegisteredUsers;
+
+        function saveRegisteredUsers() {
+            localStorage.setItem('SIMORG_USERS', JSON.stringify(registeredUsers));
+        }
+
+        let currentUserSession = JSON.parse(sessionStorage.getItem('SIMORG_USER_SESSION')) || null;
+        let currentRole = currentUserSession ? currentUserSession.role : 'Ketua';
+        let dashChartInstance = null;
+        let html5QrCodeScanner = null;
+        let loginQrScanner = null;
+
+        // Initial Data Structure
+        const initialData = {
+            pengurus: [
+                { id: 1, nisn: '0054829102', nama: 'Muhammad Rizky', kelas: 'Divisi Inti', jabatan: 'Ketua', kontak: '081234567890', status: 'Aktif' },
+                { id: 2, nisn: '0054829103', nama: 'Siti Nurhaliza', kelas: 'Divisi Inti', jabatan: 'Wakil Ketua', kontak: '081234567891', status: 'Aktif' },
+                { id: 3, nisn: '0054829104', nama: 'Ahmad Fauzi', kelas: 'Sekretariat', jabatan: 'Sekretaris', kontak: '081234567892', status: 'Aktif' },
+                { id: 4, nisn: '0054829105', nama: 'Nabila Putri', kelas: 'Keuangan', jabatan: 'Bendahara', kontak: '081234567893', status: 'Aktif' },
+                { id: 5, nisn: '0054829106', nama: 'Budi Santoso', kelas: 'Logistik', jabatan: 'Seksi Perlengkapan', kontak: '081234567894', status: 'Aktif' },
+                { id: 6, nisn: '0054829107', nama: 'Rayhan M.', kelas: 'Anggota Umum', jabatan: 'Anggota', kontak: '081234567895', status: 'Aktif' }
+            ],
+            struktur: [
+                { id: 1, level: 'pembina', jabatan: 'Pembina Organisasi', nama: 'Dra. Endang Rahayu, M.Pd', ket: 'Pembina Utama' },
+                { id: 2, level: 'inti', jabatan: 'Ketua Organisasi', nama: 'Muhammad Rizky', ket: 'Ketua Umum' },
+                { id: 3, level: 'inti', jabatan: 'Wakil Ketua', nama: 'Siti Nurhaliza', ket: 'Wakil Ketua Umum' },
+                { id: 4, level: 'sekbend', jabatan: 'Sekretaris', nama: 'Ahmad Fauzi', ket: 'Administrasi & Dokumen' },
+                { id: 5, level: 'sekbend', jabatan: 'Bendahara', nama: 'Nabila Putri', ket: 'Keuangan & Kas' },
+                { id: 6, level: 'divisi', jabatan: 'Seksi Perlengkapan', nama: 'Budi Santoso', ket: 'Inventaris & Logistik' },
+                { id: 7, level: 'divisi', jabatan: 'Divisi Humas & Event', nama: 'Kevin Anggara', ket: 'Humas & Acara' }
+            ],
+            proja: [
+                { id: 1, nama: 'Pentas Seni & Kreasi Pemuda', sekbid: 'Divisi Event', target: '2025-06-15', anggaran: 4500000, approval: 'Disetujui', progress: 65 },
+                { id: 2, nama: 'Pelatihan Kepemimpinan Organisasi', sekbid: 'Divisi Kaderisasi', target: '2025-08-20', anggaran: 7000000, approval: 'Menunggu', progress: 20 },
+                { id: 3, nama: 'Bakti Sosial & Donor Darah', sekbid: 'Divisi Humas', target: '2025-04-10', anggaran: 3000000, approval: 'Disetujui', progress: 100 }
+            ],
+            agenda: [
+                { id: 1, judul: 'Rapat Pleno Anggota Organisasi', tanggal: '2025-05-10', lokasi: 'Ruang Sekretariat SIMORG', deskripsi: 'Membahas agenda kerja bulanan.' },
+                { id: 2, judul: 'Evaluasi Program Kerja Triwulan', tanggal: '2025-05-25', lokasi: 'Aula Utama', deskripsi: 'Laporan progres masing-masing divisi kepada Pembina.' }
+            ],
+            absensi: [
+                { agendaId: 1, pengurusId: 1, status: 'Hadir', ket: '-' },
+                { agendaId: 1, pengurusId: 2, status: 'Hadir', ket: '-' },
+                { agendaId: 1, pengurusId: 3, status: 'Izin', ket: 'Ada tugas administrasi' },
+                { agendaId: 1, pengurusId: 4, status: 'Hadir', ket: '-' },
+                { agendaId: 1, pengurusId: 5, status: 'Hadir', ket: '-' }
+            ],
+            kas: [
+                { id: 1, tanggal: '2025-01-05', ket: 'Iuran Kas Anggota Januari', jenis: 'Masuk', jumlah: 600000 },
+                { id: 2, tanggal: '2025-01-12', ket: 'Pembelian ATK Sekretariat', jenis: 'Keluar', jumlah: 150000 },
+                { id: 3, tanggal: '2025-02-01', ket: 'Iuran Kas Anggota Februari', jenis: 'Masuk', jumlah: 600000 }
+            ],
+            inventaris: [
+                { id: 1, kode: 'INV-001', nama: 'Sound System & Mic Wireless', jumlah: 2, kondisi: 'Baik', lokasi: 'Ruang Logistik' },
+                { id: 2, kode: 'INV-002', nama: 'Stempel Resmi Organisasi', jumlah: 1, kondisi: 'Baik', lokasi: 'Laci Sekretaris' },
+                { id: 3, kode: 'INV-003', nama: 'Tenda & Spanduk Standee', jumlah: 4, kondisi: 'Baik', lokasi: 'Gudang Inventaris' }
+            ],
+            dokumen: [
+                { id: 1, kode: 'DOC-01/SIMORG/2025', judul: 'Proposal Pentas Seni 2025', kategori: 'Proposal', tanggal: '2025-02-10', size: '1.2 MB' },
+                { id: 2, kode: 'DOC-02/SIMORG/2025', judul: 'Surat Undangan Rapat Evaluasi', kategori: 'Surat Keluar', tanggal: '2025-02-15', size: '450 KB' }
+            ],
+            quickFeed: [
+                { text: 'Ketua menyetujui usulan kegiatan Bakti Sosial', time: '10 menit lalu' },
+                { text: 'Bendahara mencatat Iuran Kas Masuk Rp 600.000', time: '2 jam lalu' }
+            ]
+        };
+
+        let appData = JSON.parse(localStorage.getItem('SIMORG_DATA')) || initialData;
+
+        // Ensure appData.struktur initialized if missing in old cache
+        if (!appData.struktur) {
+            appData.struktur = initialData.struktur;
+        }
+
+        // Window Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('SIMORG_USERS')) {
+                saveRegisteredUsers();
+            }
+            if (!localStorage.getItem('SIMORG_DATA')) {
+                saveData();
+            }
+
+            if (currentUserSession) {
+                document.getElementById('loginScreen').style.display = 'none';
+                applyUserSession(currentUserSession);
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                initLoginQRScanner();
+            }
+        });
+
+        // Navigation Tab Switcher
+        function switchTab(tabId, event) {
+            if (event) event.preventDefault();
+
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-link-item').forEach(el => el.classList.remove('active'));
+
+            const targetSec = document.getElementById('sec-' + tabId);
+            if (targetSec) targetSec.style.display = 'block';
+
+            const activeNav = document.getElementById('menu-' + tabId);
+            if (activeNav) activeNav.classList.add('active');
+
+            const pageTitles = {
+                'dashboard': 'Dashboard Utama',
+                'pengurus': 'Data Anggota & Pengurus',
+                'struktur': 'Struktur Organisasi SIMORG',
+                'proja': 'Manajemen Program Kerja',
+                'agenda': 'Agenda & Jadwal Kegiatan',
+                'absensi': 'Pencatatan Absensi Anggota',
+                'kas': 'Keuangan & Kas Organisasi',
+                'inventaris': 'Manajemen Inventaris & Aset',
+                'dokumen': 'Arsip Dokumen Organisasi',
+                'laporan': 'Laporan & Evaluasi Kinerja',
+                'drive': 'Cloud Backup & Google Drive',
+                'profil': 'Pengaturan Profil Pengguna'
+            };
+
+            const headerTitle = document.getElementById('header-title');
+            if (headerTitle) headerTitle.innerText = pageTitles[tabId] || 'SIMORG System';
+
+            if (tabId === 'dashboard') {
+                setTimeout(initChart, 100);
+            }
+
+            if (window.innerWidth < 992) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        function showToast(msg) {
+            const toastEl = document.getElementById('liveToast');
+            document.getElementById('toast-message').innerText = msg;
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        function saveData() {
+            localStorage.setItem('SIMORG_DATA', JSON.stringify(appData));
+            updateDashboardStats();
+        }
+
+        // Initialize Login QR Code Scanner Camera
+        function initLoginQRScanner() {
+            if (loginQrScanner) {
+                stopLoginQRScanner();
+            }
+
+            loginQrScanner = new Html5Qrcode("login-qr-reader");
+            const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+            loginQrScanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    processLoginQRScan(decodedText);
+                },
+                (errorMessage) => {
+                    // Scanning...
+                }
+            ).catch(err => {
+                console.log("Kamera login tidak aktif / izin ditolak. Mengaktifkan opsi manual.", err);
+            });
+        }
+
+        function stopLoginQRScanner() {
+            if (loginQrScanner) {
+                loginQrScanner.stop().then(() => {
+                    loginQrScanner.clear();
+                    loginQrScanner = null;
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function processLoginQRScan(scannedNisn) {
+            if (!scannedNisn) return;
+            const nisn = scannedNisn.trim();
+            registeredUsers = JSON.parse(localStorage.getItem('SIMORG_USERS')) || defaultRegisteredUsers;
+            
+            const foundUser = registeredUsers.find(u => u.nisn.toLowerCase() === nisn.toLowerCase());
+            const alertBox = document.getElementById('loginAlert');
+
+            if (foundUser) {
+                alertBox.classList.add('d-none');
+                stopLoginQRScanner();
+                currentUserSession = foundUser;
+                sessionStorage.setItem('SIMORG_USER_SESSION', JSON.stringify(currentUserSession));
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                applyUserSession(currentUserSession);
+                showToast(`Login Scan Berhasil! Selamat datang, ${foundUser.name} (${foundUser.role})`);
+            } else {
+                alertBox.classList.remove('d-none');
+                document.getElementById('loginAlertMsg').innerText = `Kartu QR / NISN '${nisn}' tidak terdaftar!`;
+            }
+        }
+
+        function toggleManualLoginMode() {
+            const manualSec = document.getElementById('manualLoginSection');
+            const scanArea = document.getElementById('loginScanArea');
+            const btn = document.getElementById('btnToggleManualLogin');
+
+            if (manualSec.classList.contains('d-none')) {
+                manualSec.classList.remove('d-none');
+                scanArea.classList.add('d-none');
+                stopLoginQRScanner();
+                btn.innerHTML = `<i class="bi bi-qr-code-scan me-1"></i>Kembali ke Scan Barcode / QR Scanner`;
+            } else {
+                manualSec.classList.add('d-none');
+                scanArea.classList.remove('d-none');
+                initLoginQRScanner();
+                btn.innerHTML = `<i class="bi bi-keyboard me-1"></i>Beralih ke Input Manual (NISN & Password)`;
+            }
+        }
+
+        function quickLoginWithNISN(nisnCode) {
+            processLoginQRScan(nisnCode);
+        }
+
+        function showRegisterForm(e) {
+            if (e) e.preventDefault();
+            document.getElementById('loginFormContainer').classList.add('d-none');
+            document.getElementById('registerFormContainer').classList.remove('d-none');
+            document.getElementById('loginAlert').classList.add('d-none');
+        }
+
+        function showLoginForm(e) {
+            if (e) e.preventDefault();
+            document.getElementById('registerFormContainer').classList.add('d-none');
+            document.getElementById('loginFormContainer').classList.remove('d-none');
+            document.getElementById('registerAlert').classList.add('d-none');
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+
+        function handleRegisterSubmit(event) {
+            if (event) event.preventDefault();
+            const nama = document.getElementById('regNama').value.trim();
+            const username = document.getElementById('regUsername').value.trim().toLowerCase();
+            const nisn = document.getElementById('regNisn').value.trim();
+            const kelas = document.getElementById('regKelas').value.trim();
+            const role = document.getElementById('regRole').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const alertBox = document.getElementById('registerAlert');
+            const alertMsg = document.getElementById('registerAlertMsg');
+
+            if (password !== confirmPassword) {
+                alertBox.classList.remove('d-none');
+                alertMsg.innerText = 'Password dan Konfirmasi Password tidak cocok!';
+                return;
+            }
+
+            if (password.length < 4) {
+                alertBox.classList.remove('d-none');
+                alertMsg.innerText = 'Password minimal 4 karakter!';
+                return;
+            }
+
+            const isExist = registeredUsers.some(u => u.username.toLowerCase() === username || u.nisn === nisn);
+            if (isExist) {
+                alertBox.classList.remove('d-none');
+                alertMsg.innerText = `Username atau NISN/ID '${nisn}' sudah terdaftar!`;
+                return;
+            }
+
+            alertBox.classList.add('d-none');
+
+            const newUser = {
+                username,
+                password,
+                name: nama,
+                role,
+                nisn,
+                kelas,
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
+            };
+
+            registeredUsers.push(newUser);
+            saveRegisteredUsers();
+
+            const isPengurusExist = appData.pengurus.some(p => p.nisn === nisn);
+            if (!isPengurusExist) {
+                appData.pengurus.push({
+                    id: Date.now(),
+                    nisn: nisn,
+                    nama: nama,
+                    kelas: kelas,
+                    jabatan: role,
+                    kontak: '0812-' + Math.floor(10000000 + Math.random() * 90000000),
+                    status: 'Aktif'
+                });
+                saveData();
+            }
+
+            showMemberQRCard(nisn, nama, role);
+            showLoginForm();
+            document.getElementById('loginUsername').value = username;
+            document.getElementById('loginPassword').value = password;
+            showToast(`Registrasi Berhasil! Kartu Barcode/QR Anggota terbit otomatis.`);
+            document.getElementById('registerForm').reset();
+        }
+
+        function handleLoginSubmit(event) {
+            if (event) event.preventDefault();
+            const usernameInput = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const passwordInput = document.getElementById('loginPassword').value.trim();
+            const alertBox = document.getElementById('loginAlert');
+
+            registeredUsers = JSON.parse(localStorage.getItem('SIMORG_USERS')) || defaultRegisteredUsers;
+            const foundUser = registeredUsers.find(u => u.username.toLowerCase() === usernameInput && u.password === passwordInput);
+
+            if (foundUser) {
+                alertBox.classList.add('d-none');
+                currentUserSession = foundUser;
+                sessionStorage.setItem('SIMORG_USER_SESSION', JSON.stringify(currentUserSession));
+                
+                document.getElementById('loginScreen').style.display = 'none';
+                applyUserSession(currentUserSession);
+                showToast(`Selamat datang, ${foundUser.name} (${foundUser.role})!`);
+            } else {
+                alertBox.classList.remove('d-none');
+                document.getElementById('loginAlertMsg').innerText = 'Username atau password salah!';
+            }
+        }
+
+        function applyUserSession(user) {
+            currentRole = user.role;
+            document.getElementById('userNameDisplay').innerText = user.name;
+            document.getElementById('userRoleBadge').innerText = `${user.role} Organisasi`;
+            document.getElementById('activeRoleNameTag').innerText = user.role;
+            document.getElementById('userAvatarHeader').src = user.avatar;
+            
+            document.getElementById('profileName').innerText = user.name;
+            document.getElementById('profileRoleBadge').innerText = `${user.role} Organisasi`;
+            document.getElementById('profileAvatarImg').src = user.avatar;
+            document.getElementById('bannerRoleName').innerText = `${user.role} Organisasi`;
+
+            const roleDescs = {
+                'Ketua': 'Hak Akses Penuh (Full Access) untuk mengelola seluruh modul SIMORG.',
+                'Pembina': 'Akses persetujuan (Approval) Program Kerja & Evaluasi Catatan Pembina.',
+                'Sekretaris': 'Akses khusus kelola Absensi Anggota, Upload Dokumen, dan Agenda Kegiatan.',
+                'Bendahara': 'Akses khusus manajemen Kas Organisasi (Pemasukan, Pengeluaran, Saldo).',
+                'Perlengkapan': 'Akses khusus manajemen Inventaris & Aset Peralatan Organisasi.',
+                'Anggota': 'Mode Read-Only (Hanya melihat informasi dashboard, proja, & agenda).'
+            };
+            document.getElementById('bannerRoleDesc').innerText = roleDescs[user.role] || '';
+
+            applyRolePermissions();
+            renderAllTables();
+            updateDashboardStats();
+            initChart();
+        }
+
+        function confirmLogout() {
+            if (confirm('Apakah Anda yakin ingin keluar dari aplikasi SIMORG?')) {
+                sessionStorage.removeItem('SIMORG_USER_SESSION');
+                currentUserSession = null;
+                document.getElementById('loginScreen').style.display = 'flex';
+                initLoginQRScanner();
+                showToast('Anda telah keluar.');
+            }
+        }
+
+        function handlePasswordChange(e) {
+            e.preventDefault();
+            const oldPass = document.getElementById('oldPasswordInput').value;
+            const newPass = document.getElementById('newPasswordInput').value;
+            
+            if (currentUserSession && oldPass === currentUserSession.password) {
+                currentUserSession.password = newPass;
+                sessionStorage.setItem('SIMORG_USER_SESSION', JSON.stringify(currentUserSession));
+                showToast('Password berhasil diperbarui!');
+                document.getElementById('formPassword').reset();
+            } else {
+                alert('Password lama salah!');
+            }
+        }
+
+        function saveSchoolProfile(e) {
+            e.preventDefault();
+            const sName = document.getElementById('schoolName').value;
+            showToast(`Identitas lembaga '${sName}' berhasil disimpan!`);
+        }
+
+        function applyRolePermissions() {
+            const setVisible = (selector, condition) => {
+                document.querySelectorAll(selector).forEach(el => {
+                    el.style.display = condition ? 'inline-block' : 'none';
+                });
+            };
+
+            const isKetua = currentRole === 'Ketua';
+            const isPembina = currentRole === 'Pembina';
+            const isSekretaris = currentRole === 'Sekretaris';
+            const isBendahara = currentRole === 'Bendahara';
+            const isPerlengkapan = currentRole === 'Perlengkapan';
+
+            setVisible('.role-restrict-ketua', isKetua);
+            setVisible('.role-restrict-approval', isKetua || isPembina);
+            setVisible('.role-restrict-pembina', isPembina || isKetua);
+            setVisible('.role-restrict-sekretaris', isSekretaris || isKetua);
+            setVisible('.role-restrict-bendahara', isBendahara || isKetua);
+            setVisible('.role-restrict-perlengkapan', isPerlengkapan || isKetua);
+        }
+
+        function renderAllTables() {
+            renderPengurusTable();
+            renderStrukturTree();
+            renderProjaTable();
+            renderAgendaCards();
+            renderAbsensiAgendaOptions();
+            renderAbsensiTable();
+            renderKasTable();
+            renderInventarisTable();
+            renderDokumenTable();
+        }
+
+        // Render Data Anggota
+        function renderPengurusTable() {
+            const tbody = document.getElementById('pengurusTableBody');
+            const search = (document.getElementById('searchPengurus')?.value || '').toLowerCase();
+            const filterJabatan = document.getElementById('filterJabatan')?.value || '';
+
+            tbody.innerHTML = '';
+            appData.pengurus
+                .filter(p => {
+                    const matchSearch = p.nama.toLowerCase().includes(search) || p.nisn.toLowerCase().includes(search) || p.jabatan.toLowerCase().includes(search);
+                    const matchJabatan = filterJabatan ? p.jabatan === filterJabatan : true;
+                    return matchSearch && matchJabatan;
+                })
+                .forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${p.nisn}</td>
+                            <td>${p.nama}</td>
+                            <td>${p.kelas}</td>
+                            <td><span class="badge bg-secondary">${p.jabatan}</span></td>
+                            <td>${p.kontak}</td>
+                            <td><span class="badge ${p.status === 'Aktif' ? 'bg-success' : 'bg-warning'}">${p.status}</span></td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-dark" onclick="showMemberQRCard('${p.nisn}', '${p.nama}', '${p.jabatan}')" title="Lihat Kartu QR">
+                                    <i class="bi bi-qr-code"></i> Card
+                                </button>
+                            </td>
+                            <td class="text-center role-restrict-ketua">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="openModalPengurus(${p.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deletePengurus(${p.id})"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            applyRolePermissions();
+        }
+
+        function openModalPengurus(id = null) {
+            document.getElementById('formPengurus').reset();
+            if (id) {
+                const item = appData.pengurus.find(p => p.id === id);
+                if (item) {
+                    document.getElementById('pengurusId').value = item.id;
+                    document.getElementById('pengurusNisn').value = item.nisn;
+                    document.getElementById('pengurusNama').value = item.nama;
+                    document.getElementById('pengurusKelas').value = item.kelas;
+                    document.getElementById('pengurusJabatan').value = item.jabatan;
+                    document.getElementById('pengurusKontak').value = item.kontak;
+                    document.getElementById('pengurusStatus').value = item.status;
+                    document.getElementById('modalPengurusTitle').innerText = 'Edit Data Anggota';
+                }
+            } else {
+                document.getElementById('pengurusId').value = '';
+                document.getElementById('modalPengurusTitle').innerText = 'Tambah Anggota';
+            }
+            new bootstrap.Modal(document.getElementById('modalPengurus')).show();
+        }
+
+        function savePengurus(e) {
+            e.preventDefault();
+            const id = document.getElementById('pengurusId').value;
+            const nisn = document.getElementById('pengurusNisn').value.trim();
+            const nama = document.getElementById('pengurusNama').value.trim();
+            const kelas = document.getElementById('pengurusKelas').value.trim();
+            const jabatan = document.getElementById('pengurusJabatan').value;
+            const kontak = document.getElementById('pengurusKontak').value.trim();
+            const status = document.getElementById('pengurusStatus').value;
+
+            if (id) {
+                const item = appData.pengurus.find(p => p.id == id);
+                if (item) {
+                    item.nisn = nisn;
+                    item.nama = nama;
+                    item.kelas = kelas;
+                    item.jabatan = jabatan;
+                    item.kontak = kontak;
+                    item.status = status;
+                }
+            } else {
+                appData.pengurus.push({
+                    id: Date.now(),
+                    nisn,
+                    nama,
+                    kelas,
+                    jabatan,
+                    kontak,
+                    status
+                });
+            }
+
+            saveData();
+            renderPengurusTable();
+            bootstrap.Modal.getInstance(document.getElementById('modalPengurus')).hide();
+            showToast('Data anggota berhasil disimpan.');
+        }
+
+        function deletePengurus(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data anggota ini?')) {
+                appData.pengurus = appData.pengurus.filter(p => p.id !== id);
+                saveData();
+                renderPengurusTable();
+                showToast('Data anggota berhasil dihapus.');
+            }
+        }
+
+        // Show Member QR Code Card Modal
+        function showMemberQRCard(nisn, nama, jabatan) {
+            document.getElementById('qrCardName').innerText = nama;
+            document.getElementById('qrCardJabatan').innerText = jabatan;
+            document.getElementById('qrCardID').innerText = `ID/NISN: ${nisn}`;
+
+            const container = document.getElementById('qrcodeContainer');
+            container.innerHTML = '';
+            new QRCode(container, {
+                text: nisn,
+                width: 160,
+                height: 160,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            new bootstrap.Modal(document.getElementById('modalCardQR')).show();
+        }
+
+        // Dynamic Struktur Organisasi Tree
+        function renderStrukturTree() {
+            const container = document.getElementById('structureContainer');
+            if (!container) return;
+
+            const isKetua = currentRole === 'Ketua';
+            const pembinas = appData.struktur.filter(s => s.level === 'pembina');
+            const intis = appData.struktur.filter(s => s.level === 'inti');
+            const sekbends = appData.struktur.filter(s => s.level === 'sekbend');
+            const divisis = appData.struktur.filter(s => s.level === 'divisi');
+
+            let html = '';
+
+            // Pembina Node
+            if (pembinas.length > 0) {
+                html += `<div class="d-flex flex-wrap gap-3 justify-content-center">`;
+                pembinas.forEach(s => {
+                    html += `
+                        <div class="tree-node border-danger" style="width: 280px;">
+                            ${isKetua ? `
+                            <div class="position-absolute top-0 end-0 p-1">
+                                <button class="btn btn-xs btn-outline-primary py-0 px-1" onclick="openModalStruktur(${s.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteStruktur(${s.id})"><i class="bi bi-trash"></i></button>
+                            </div>` : ''}
+                            <span class="badge bg-danger badge-role mb-1">${s.jabatan}</span>
+                            <h6 class="fw-bold mb-0">${s.nama}</h6>
+                            <small class="text-muted">${s.ket || '-'}</small>
+                        </div>
+                    `;
+                });
+                html += `</div><div class="border-start border-2 border-secondary" style="height: 20px;"></div>`;
+            }
+
+            // Inti Node
+            if (intis.length > 0) {
+                html += `<div class="d-flex flex-wrap gap-4 justify-content-center">`;
+                intis.forEach(s => {
+                    html += `
+                        <div class="tree-node border-info" style="width: 250px;">
+                            ${isKetua ? `
+                            <div class="position-absolute top-0 end-0 p-1">
+                                <button class="btn btn-xs btn-outline-primary py-0 px-1" onclick="openModalStruktur(${s.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteStruktur(${s.id})"><i class="bi bi-trash"></i></button>
+                            </div>` : ''}
+                            <span class="badge bg-primary badge-role mb-1">${s.jabatan}</span>
+                            <h6 class="fw-bold mb-0">${s.nama}</h6>
+                            <small class="text-muted">${s.ket || '-'}</small>
+                        </div>
+                    `;
+                });
+                html += `</div><div class="border-start border-2 border-secondary" style="height: 20px;"></div>`;
+            }
+
+            // Sekbend Node
+            if (sekbends.length > 0) {
+                html += `<div class="d-flex flex-wrap gap-4 justify-content-center">`;
+                sekbends.forEach(s => {
+                    html += `
+                        <div class="tree-node" style="width: 220px;">
+                            ${isKetua ? `
+                            <div class="position-absolute top-0 end-0 p-1">
+                                <button class="btn btn-xs btn-outline-primary py-0 px-1" onclick="openModalStruktur(${s.id})"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteStruktur(${s.id})"><i class="bi bi-trash"></i></button>
+                            </div>` : ''}
+                            <span class="badge bg-secondary badge-role mb-1">${s.jabatan}</span>
+                            <h6 class="fw-bold mb-0">${s.nama}</h6>
+                            <small class="text-muted">${s.ket || '-'}</small>
+                        </div>
+                    `;
+                });
+                html += `</div><div class="border-start border-2 border-secondary" style="height: 20px;"></div>`;
+            }
+
+            // Divisi Node
+            if (divisis.length > 0) {
+                html += `<div class="row g-3 w-100 justify-content-center">`;
+                divisis.forEach(s => {
+                    html += `
+                        <div class="col-12 col-sm-6 col-md-4">
+                            <div class="tree-node h-100">
+                                ${isKetua ? `
+                                <div class="position-absolute top-0 end-0 p-1">
+                                    <button class="btn btn-xs btn-outline-primary py-0 px-1" onclick="openModalStruktur(${s.id})"><i class="bi bi-pencil"></i></button>
+                                    <button class="btn btn-xs btn-outline-danger py-0 px-1" onclick="deleteStruktur(${s.id})"><i class="bi bi-trash"></i></button>
+                                </div>` : ''}
+                                <span class="badge bg-dark badge-role mb-1">${s.jabatan}</span>
+                                <h6 class="fw-bold mb-1" style="font-size: 0.9rem;">${s.ket || '-'}</h6>
+                                <hr class="my-1">
+                                <small class="d-block">Koord: ${s.nama}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function openModalStruktur(id = null) {
+            document.getElementById('formStruktur').reset();
+            if (id) {
+                const s = appData.struktur.find(item => item.id === id);
+                if (s) {
+                    document.getElementById('strukturId').value = s.id;
+                    document.getElementById('strukturJabatan').value = s.jabatan;
+                    document.getElementById('strukturNama').value = s.nama;
+                    document.getElementById('strukturLevel').value = s.level;
+                    document.getElementById('strukturKet').value = s.ket || '';
+                    document.getElementById('modalStrukturTitle').innerText = 'Edit Posisi Struktur';
+                }
+            } else {
+                document.getElementById('strukturId').value = '';
+                document.getElementById('modalStrukturTitle').innerText = 'Tambah Posisi Struktur';
+            }
+            new bootstrap.Modal(document.getElementById('modalStruktur')).show();
+        }
+
+        function saveStruktur(e) {
+            e.preventDefault();
+            const id = document.getElementById('strukturId').value;
+            const jabatan = document.getElementById('strukturJabatan').value.trim();
+            const nama = document.getElementById('strukturNama').value.trim();
+            const level = document.getElementById('strukturLevel').value;
+            const ket = document.getElementById('strukturKet').value.trim();
+
+            if (id) {
+                const s = appData.struktur.find(item => item.id == id);
+                if (s) {
+                    s.jabatan = jabatan;
+                    s.nama = nama;
+                    s.level = level;
+                    s.ket = ket;
+                }
+            } else {
+                appData.struktur.push({
+                    id: Date.now(),
+                    jabatan,
+                    nama,
+                    level,
+                    ket
+                });
+            }
+
+            saveData();
+            renderStrukturTree();
+            bootstrap.Modal.getInstance(document.getElementById('modalStruktur')).hide();
+            showToast('Posisi struktur organisasi berhasil disimpan.');
+        }
+
+        function deleteStruktur(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus posisi ini dari struktur organisasi?')) {
+                appData.struktur = appData.struktur.filter(s => s.id !== id);
+                saveData();
+                renderStrukturTree();
+                showToast('Posisi struktur berhasil dihapus.');
+            }
+        }
+
+        // Scanner QR Code Absensi Modal Handlers
+        function openModalScanQR() {
+            const selectedAgendaId = parseInt(document.getElementById('absensiAgendaSelect')?.value || appData.agenda[0]?.id);
+            const targetAgenda = appData.agenda.find(a => a.id === selectedAgendaId);
+            
+            document.getElementById('scanTargetAgendaName').innerText = targetAgenda ? targetAgenda.judul : 'Agenda Kegiatan';
+            document.getElementById('manualScanInput').value = '';
+            
+            const alertBox = document.getElementById('scanResultAlert');
+            alertBox.className = 'mt-3 alert d-none py-2 small';
+
+            const modal = new bootstrap.Modal(document.getElementById('modalScanQR'));
+            modal.show();
+
+            setTimeout(() => {
+                startQRScanner();
+            }, 400);
+        }
+
+        function startQRScanner() {
+            if (html5QrCodeScanner) {
+                stopQRScanner();
+            }
+
+            html5QrCodeScanner = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+            html5QrCodeScanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    processScannedCode(decodedText);
+                },
+                (errorMessage) => {
+                    // Scanning...
+                }
+            ).catch(err => {
+                console.log("Kamera tidak aktif/izin ditolak. Gunakan opsi manual input.", err);
+            });
+        }
+
+        function stopQRScanner() {
+            if (html5QrCodeScanner) {
+                html5QrCodeScanner.stop().then(() => {
+                    html5QrCodeScanner.clear();
+                    html5QrCodeScanner = null;
+                }).catch(err => console.log(err));
+            }
+        }
+
+        function processScannedCode(scannedCode) {
+            if (!scannedCode) return;
+            const code = scannedCode.trim();
+            const selectedAgendaId = parseInt(document.getElementById('absensiAgendaSelect')?.value || appData.agenda[0]?.id);
+            const alertBox = document.getElementById('scanResultAlert');
+
+            const pengurus = appData.pengurus.find(p => p.nisn.toLowerCase() === code.toLowerCase());
+
+            if (pengurus) {
+                const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                let rec = appData.absensi.find(a => a.agendaId === selectedAgendaId && a.pengurusId === pengurus.id);
+                
+                if (rec) {
+                    rec.status = 'Hadir';
+                    rec.ket = `Scan QR (${nowTime})`;
+                } else {
+                    appData.absensi.push({
+                        agendaId: selectedAgendaId,
+                        pengurusId: pengurus.id,
+                        status: 'Hadir',
+                        ket: `Scan QR (${nowTime})`
+                    });
+                }
+                saveData();
+                renderAbsensiTable();
+
+                alertBox.className = 'mt-3 alert alert-success py-2 small';
+                alertBox.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> <strong>BERHASIL:</strong> ${pengurus.nama} (${pengurus.jabatan}) tercatat HADIR!`;
+                showToast(`Absensi BERHASIL: ${pengurus.nama}`);
+                document.getElementById('manualScanInput').value = '';
+            } else {
+                alertBox.className = 'mt-3 alert alert-danger py-2 small';
+                alertBox.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> <strong>GAGAL:</strong> ID/NISN '${code}' tidak terdaftar!`;
+            }
+        }
+
+        // Render Program Kerja
+        function renderProjaTable() {
+            const tbody = document.getElementById('projaTableBody');
+            tbody.innerHTML = '';
+            appData.proja.forEach(p => {
+                let badgeApproval = p.approval === 'Disetujui' ? 'bg-success' : (p.approval === 'Ditolak' ? 'bg-danger' : 'bg-warning text-dark');
+                let approvalAction = '-';
+
+                if(currentRole === 'Pembina' || currentRole === 'Ketua') {
+                    approvalAction = `
+                        <button class="btn btn-sm btn-success me-1" onclick="setApprovalProja(${p.id}, 'Disetujui')"><i class="bi bi-check-lg"></i> Setuju</button>
+                        <button class="btn btn-sm btn-danger me-1" onclick="setApprovalProja(${p.id}, 'Ditolak')"><i class="bi bi-x-lg"></i> Tolak</button>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${p.nama}</td>
+                        <td><span class="badge border text-dark">${p.sekbid}</span></td>
+                        <td>${p.target}</td>
+                        <td>Rp ${parseInt(p.anggaran).toLocaleString('id-ID')}</td>
+                        <td><span class="badge ${badgeApproval}">${p.approval}</span></td>
+                        <td style="min-width: 150px;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div class="progress-bar bg-teal-accent" style="width: ${p.progress}%"></div>
+                                </div>
+                                <small class="fw-bold">${p.progress}%</small>
+                            </div>
+                        </td>
+                        <td class="text-center role-restrict-approval">
+                            ${approvalAction}
+                        </td>
+                        <td class="text-center role-restrict-ketua">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="openModalProja(${p.id})"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteProja(${p.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            applyRolePermissions();
+        }
+
+        function openModalProja(id = null) {
+            document.getElementById('formProja').reset();
+            if (id) {
+                const p = appData.proja.find(item => item.id === id);
+                if (p) {
+                    document.getElementById('projaId').value = p.id;
+                    document.getElementById('projaNama').value = p.nama;
+                    document.getElementById('projaSekbid').value = p.sekbid;
+                    document.getElementById('projaTarget').value = p.target;
+                    document.getElementById('projaAnggaran').value = p.anggaran;
+                    document.getElementById('projaProgress').value = p.progress;
+                    document.getElementById('modalProjaTitle').innerText = 'Edit Program Kerja';
+                }
+            } else {
+                document.getElementById('projaId').value = '';
+                document.getElementById('modalProjaTitle').innerText = 'Tambah Program Kerja Baru';
+            }
+            new bootstrap.Modal(document.getElementById('modalProja')).show();
+        }
+
+        function saveProja(e) {
+            e.preventDefault();
+            const id = document.getElementById('projaId').value;
+            const nama = document.getElementById('projaNama').value.trim();
+            const sekbid = document.getElementById('projaSekbid').value.trim();
+            const target = document.getElementById('projaTarget').value;
+            const anggaran = parseInt(document.getElementById('projaAnggaran').value || 0);
+            const progress = parseInt(document.getElementById('projaProgress').value || 0);
+
+            if (id) {
+                const item = appData.proja.find(p => p.id == id);
+                if (item) {
+                    item.nama = nama;
+                    item.sekbid = sekbid;
+                    item.target = target;
+                    item.anggaran = anggaran;
+                    item.progress = progress;
+                }
+            } else {
+                appData.proja.push({
+                    id: Date.now(),
+                    nama,
+                    sekbid,
+                    target,
+                    anggaran,
+                    approval: 'Menunggu',
+                    progress
+                });
+            }
+
+            saveData();
+            renderProjaTable();
+            bootstrap.Modal.getInstance(document.getElementById('modalProja')).hide();
+            showToast('Program kerja berhasil disimpan.');
+        }
+
+        function deleteProja(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus program kerja ini?')) {
+                appData.proja = appData.proja.filter(p => p.id !== id);
+                saveData();
+                renderProjaTable();
+                showToast('Program kerja berhasil dihapus.');
+            }
+        }
+
+        function setApprovalProja(id, status) {
+            const item = appData.proja.find(p => p.id === id);
+            if(item) {
+                item.approval = status;
+                saveData();
+                renderProjaTable();
+                showToast(`Program kerja ${item.nama} telah: ${status}`);
+            }
+        }
+
+        // Render Agenda
+        function renderAgendaCards() {
+            const container = document.getElementById('agendaCardContainer');
+            container.innerHTML = '';
+            appData.agenda.forEach(a => {
+                container.innerHTML += `
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card card-custom p-3 h-100">
+                            <span class="badge bg-warning text-dark w-auto self-start mb-2"><i class="bi bi-clock me-1"></i>${a.tanggal}</span>
+                            <h6 class="fw-bold text-dark">${a.judul}</h6>
+                            <p class="small text-muted mb-2"><i class="bi bi-geo-alt me-1"></i>${a.lokasi}</p>
+                            <p class="small text-secondary mb-0">${a.deskripsi}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function openModalAgenda() {
+            document.getElementById('formAgenda').reset();
+            new bootstrap.Modal(document.getElementById('modalAgenda')).show();
+        }
+
+        function saveAgenda(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                judul: document.getElementById('agendaJudul').value,
+                tanggal: document.getElementById('agendaTanggal').value,
+                lokasi: document.getElementById('agendaLokasi').value,
+                deskripsi: document.getElementById('agendaDeskripsi').value
+            };
+            appData.agenda.push(item);
+            saveData();
+            renderAgendaCards();
+            renderAbsensiAgendaOptions();
+            bootstrap.Modal.getInstance(document.getElementById('modalAgenda')).hide();
+            showToast('Agenda kegiatan berhasil ditambahkan.');
+        }
+
+        // Render Absensi
+        function renderAbsensiAgendaOptions() {
+            const select = document.getElementById('absensiAgendaSelect');
+            if (!select) return;
+            select.innerHTML = '';
+            appData.agenda.forEach(a => {
+                select.innerHTML += `<option value="${a.id}">${a.judul} (${a.tanggal})</option>`;
+            });
+        }
+
+        function renderAbsensiTable() {
+            const tbody = document.getElementById('absensiTableBody');
+            if (!tbody) return;
+
+            const selectedAgendaId = parseInt(document.getElementById('absensiAgendaSelect')?.value || appData.agenda[0]?.id || 1);
+            tbody.innerHTML = '';
+
+            appData.pengurus.forEach(p => {
+                const rec = appData.absensi.find(a => a.agendaId === selectedAgendaId && a.pengurusId === p.id) || { status: 'Hadir', ket: '-' };
+                
+                let isSekretarisOrKetua = currentRole === 'Sekretaris' || currentRole === 'Ketua';
+                let inputAction = isSekretarisOrKetua ? `
+                    <select class="form-select form-select-sm" onchange="updateAbsensi(${selectedAgendaId}, ${p.id}, this.value)">
+                        <option value="Hadir" ${rec.status === 'Hadir' ? 'selected' : ''}>Hadir</option>
+                        <option value="Izin" ${rec.status === 'Izin' ? 'selected' : ''}>Izin</option>
+                        <option value="Sakit" ${rec.status === 'Sakit' ? 'selected' : ''}>Sakit</option>
+                        <option value="Alpha" ${rec.status === 'Alpha' ? 'selected' : ''}>Alpha</option>
+                    </select>
+                ` : `<span class="badge bg-light text-dark border">Tercatat</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${p.nama}</td>
+                        <td>${p.jabatan}</td>
+                        <td><span class="badge ${rec.status === 'Hadir' ? 'bg-success' : 'bg-warning'}">${rec.status}</span></td>
+                        <td>${rec.ket}</td>
+                        <td class="text-center role-restrict-sekretaris">${inputAction}</td>
+                    </tr>
+                `;
+            });
+            applyRolePermissions();
+        }
+
+        function updateAbsensi(agendaId, pengurusId, status) {
+            let rec = appData.absensi.find(a => a.agendaId === agendaId && a.pengurusId === pengurusId);
+            if(rec) {
+                rec.status = status;
+            } else {
+                appData.absensi.push({ agendaId, pengurusId, status, ket: '-' });
+            }
+            saveData();
+            showToast('Absensi diperbarui.');
+        }
+
+        // Render Kas
+        function renderKasTable() {
+            const tbody = document.getElementById('kasTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let masuk = 0, keluar = 0;
+
+            appData.kas.forEach(k => {
+                if(k.jenis === 'Masuk') masuk += parseInt(k.jumlah);
+                else keluar += parseInt(k.jumlah);
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${k.tanggal}</td>
+                        <td class="fw-bold">${k.ket}</td>
+                        <td><span class="badge ${k.jenis === 'Masuk' ? 'bg-success' : 'bg-danger'}">${k.jenis}</span></td>
+                        <td>Rp ${parseInt(k.jumlah).toLocaleString('id-ID')}</td>
+                        <td class="text-center role-restrict-bendahara">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteKas(${k.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const saldo = masuk - keluar;
+            if (document.getElementById('kasTotalMasuk')) document.getElementById('kasTotalMasuk').innerText = `Rp ${masuk.toLocaleString('id-ID')}`;
+            if (document.getElementById('kasTotalKeluar')) document.getElementById('kasTotalKeluar').innerText = `Rp ${keluar.toLocaleString('id-ID')}`;
+            if (document.getElementById('kasTotalSaldo')) document.getElementById('kasTotalSaldo').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
+            if (document.getElementById('dashSaldoKas')) document.getElementById('dashSaldoKas').innerText = `Rp ${saldo.toLocaleString('id-ID')}`;
+
+            applyRolePermissions();
+        }
+
+        function openModalKas() {
+            document.getElementById('formKas').reset();
+            new bootstrap.Modal(document.getElementById('modalKas')).show();
+        }
+
+        function saveKas(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                tanggal: document.getElementById('kasTanggal').value,
+                ket: document.getElementById('kasKet').value,
+                jenis: document.getElementById('kasJenis').value,
+                jumlah: parseInt(document.getElementById('kasJumlah').value)
+            };
+            appData.kas.push(item);
+            saveData();
+            renderKasTable();
+            bootstrap.Modal.getInstance(document.getElementById('modalKas')).hide();
+            showToast('Transaksi kas dicatat.');
+        }
+
+        function deleteKas(id) {
+            if(confirm('Hapus data transaksi ini?')) {
+                appData.kas = appData.kas.filter(k => k.id !== id);
+                saveData();
+                renderKasTable();
+                showToast('Transaksi kas dihapus.');
+            }
+        }
+
+        // Render Inventaris
+        function renderInventarisTable() {
+            const tbody = document.getElementById('inventarisTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            appData.inventaris.forEach(inv => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${inv.kode}</td>
+                        <td>${inv.nama}</td>
+                        <td>${inv.jumlah} Pcs</td>
+                        <td><span class="badge bg-info text-dark">${inv.kondisi}</span></td>
+                        <td>${inv.lokasi}</td>
+                        <td class="text-center role-restrict-perlengkapan">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteInventaris(${inv.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            applyRolePermissions();
+        }
+
+        function openModalInventaris() {
+            document.getElementById('formInventaris').reset();
+            new bootstrap.Modal(document.getElementById('modalInventaris')).show();
+        }
+
+        function saveInventaris(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                kode: document.getElementById('invKode').value,
+                nama: document.getElementById('invNama').value,
+                jumlah: parseInt(document.getElementById('invJumlah').value),
+                kondisi: document.getElementById('invKondisi').value,
+                lokasi: document.getElementById('invLokasi').value
+            };
+            appData.inventaris.push(item);
+            saveData();
+            renderInventarisTable();
+            bootstrap.Modal.getInstance(document.getElementById('modalInventaris')).hide();
+            showToast('Aset inventaris ditambahkan.');
+        }
+
+        function deleteInventaris(id) {
+            if(confirm('Hapus barang inventaris ini?')) {
+                appData.inventaris = appData.inventaris.filter(i => i.id !== id);
+                saveData();
+                renderInventarisTable();
+                showToast('Aset inventaris dihapus.');
+            }
+        }
+
+        // Render Dokumen
+        function renderDokumenTable() {
+            const tbody = document.getElementById('dokumenTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            appData.dokumen.forEach(doc => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${doc.kode}</td>
+                        <td>${doc.judul}</td>
+                        <td><span class="badge bg-secondary">${doc.kategori}</span></td>
+                        <td>${doc.tanggal}</td>
+                        <td>${doc.size}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-primary" onclick="downloadDokumenFile(${doc.id})"><i class="bi bi-download"></i> Unduh</button>
+                            <button class="btn btn-sm btn-outline-danger role-restrict-sekretaris ms-1" onclick="deleteDokumen(${doc.id})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            applyRolePermissions();
+        }
+
+        let uploadedFileBase64 = null;
+        let uploadedFileName = '';
+        let uploadedFileSize = '';
+
+        function handleDocFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            uploadedFileName = file.name;
+            const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+            uploadedFileSize = sizeInMB > 1 ? `${sizeInMB} MB` : `${Math.round(file.size / 1024)} KB`;
+            
+            document.getElementById('docSize').value = uploadedFileSize;
+            if (!document.getElementById('docJudul').value) {
+                document.getElementById('docJudul').value = file.name.split('.').slice(0, -1).join('.');
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                uploadedFileBase64 = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function openModalDokumen() {
+            document.getElementById('formDokumen').reset();
+            uploadedFileBase64 = null;
+            uploadedFileName = '';
+            uploadedFileSize = '';
+            new bootstrap.Modal(document.getElementById('modalDokumen')).show();
+        }
+
+        function saveDokumen(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                kode: document.getElementById('docKode').value,
+                judul: document.getElementById('docJudul').value,
+                kategori: document.getElementById('docKategori').value,
+                tanggal: new Date().toISOString().split('T')[0],
+                size: uploadedFileSize || document.getElementById('docSize').value || '1.0 MB',
+                fileName: uploadedFileName || 'Dokumen.pdf',
+                fileData: uploadedFileBase64 || null
+            };
+            appData.dokumen.push(item);
+            saveData();
+            renderDokumenTable();
+            bootstrap.Modal.getInstance(document.getElementById('modalDokumen')).hide();
+            showToast('Dokumen dari file lokal berhasil diunggah!');
+        }
+
+        function downloadDokumenFile(id) {
+            const doc = appData.dokumen.find(d => d.id === id);
+            if (!doc) return;
+
+            if (doc.fileData) {
+                const link = document.createElement('a');
+                link.href = doc.fileData;
+                link.download = doc.fileName || `${doc.judul}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast(`Mengunduh file lokal: ${doc.judul}`);
+            } else {
+                showToast(`Simulasi unduh file bawaan: ${doc.judul}`);
+            }
+        }
+
+        function deleteDokumen(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus arsip dokumen ini?')) {
+                appData.dokumen = appData.dokumen.filter(d => d.id !== id);
+                saveData();
+                renderDokumenTable();
+                showToast('Arsip dokumen berhasil dihapus.');
+            }
+        }
+
+        // Google Drive & Export Utilities
+        function exportDataCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "=== DATA KAS ORGANISASI ===\nID,Tanggal,Keterangan,Jenis,Jumlah\n";
+            
+            appData.kas.forEach(k => {
+                csvContent += `${k.id},${k.tanggal},"${k.ket}",${k.jenis},${k.jumlah}\n`;
+            });
+
+            csvContent += "\n=== DATA ANGGOTA ===\nNISN,Nama,Kelas,Jabatan,Status\n";
+            appData.pengurus.forEach(p => {
+                csvContent += `${p.nisn},"${p.nama}",${p.kelas},${p.jabatan},${p.status}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `SIMORG_DATA_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('File CSV berhasil diunduh. Siap diunggah ke Google Sheets!');
+        }
+
+        function exportDataJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            const fileName = `SIMORG_BACKUP_${new Date().toISOString().split('T')[0]}.json`;
+            
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", fileName);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            
+            showToast('Backup database (.json) berhasil diunduh. Siap disimpan ke Google Drive!');
+        }
+
+        function importDataJSON() {
+            const fileInput = document.getElementById('importFileJson');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Silakan pilih file backup .json terlebih dahulu!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.pengurus && importedData.proja && importedData.kas) {
+                        appData = importedData;
+                        saveData();
+                        renderAllTables();
+                        showToast('Restore data dari Google Drive / File Backup BERHASIL!');
+                        fileInput.value = '';
+                    } else {
+                        alert('Format file JSON tidak valid!');
+                    }
+                } catch (err) {
+                    alert('Gagal membaca file JSON backup.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveGoogleSheetsConfig() {
+            const url = document.getElementById('googleScriptUrl').value;
+            localStorage.setItem('SIMORG_SHEETS_WEBHOOK', url);
+            showToast('Webhook URL Google Sheets berhasil disimpan!');
+        }
+
+        function syncToGoogleSheets() {
+            const webhookUrl = localStorage.getItem('SIMORG_SHEETS_WEBHOOK') || document.getElementById('googleScriptUrl').value;
+            if (!webhookUrl) {
+                alert('Silakan isi Webhook URL Google Apps Script terlebih dahulu!');
+                return;
+            }
+
+            showToast('Mengirimkan data ke Google Sheets...');
+            
+            fetch(webhookUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(appData)
+            }).then(() => {
+                showToast('Sinkronisasi data ke Google Sheets berhasil terkirim!');
+            }).catch(err => {
+                showToast('Sinkronisasi selesai (dikirim ke Google Apps Script).');
+            });
+        }
+
+        // Dashboard Overview & Stats
+        function updateDashboardStats() {
+            if (document.getElementById('dashTotalPengurus')) document.getElementById('dashTotalPengurus').innerText = appData.pengurus.length;
+            if (document.getElementById('dashProjaAktif')) document.getElementById('dashProjaAktif').innerText = appData.proja.filter(p => p.progress < 100).length;
+            if (document.getElementById('dashAgendaMendatang')) document.getElementById('dashAgendaMendatang').innerText = appData.agenda.length;
+
+            const feedList = document.getElementById('quickFeedList');
+            if(feedList) {
+                feedList.innerHTML = '';
+                appData.quickFeed.forEach(f => {
+                    feedList.innerHTML += `
+                        <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                            <div><i class="bi bi-dot text-primary me-1 fs-5"></i>${f.text}</div>
+                            <small class="text-muted">${f.time}</small>
+                        </li>
+                    `;
+                });
+            }
+
+            const totalProja = appData.proja.length;
+            const selesaiProja = appData.proja.filter(p => p.progress === 100).length;
+            const persen = totalProja > 0 ? Math.round((selesaiProja / totalProja) * 100) : 0;
+
+            if (document.getElementById('lapTotalProja')) {
+                document.getElementById('lapTotalProja').innerText = totalProja;
+                document.getElementById('lapProjaSelesai').innerText = selesaiProja;
+                document.getElementById('lapProjaPersen').innerText = `${persen}%`;
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('dashboardChart');
+            if(!ctx) return;
+
+            if (dashChartInstance) {
+                dashChartInstance.destroy();
+            }
+
+            dashChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'Pemasukan Kas (Rp)',
+                            data: [600000, 600000, 750000, 500000, 900000, 650000],
+                            backgroundColor: '#0d9488'
+                        },
+                        {
+                            label: 'Pengeluaran Kas (Rp)',
+                            data: [150000, 200000, 300000, 100000, 450000, 250000],
+                            backgroundColor: '#ef4444'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
